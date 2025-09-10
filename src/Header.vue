@@ -38,7 +38,7 @@
       </svg>
     </div>
     <div v-if="showCloseButton" class="sc-header--close-button" @click="$emit('close')">
-      <!-- <img v-if="icons.close.img" :src="icons.close.img" :alt="icons.close.name" /> -->
+      <img v-if="icons.close.img" :src="icons.close.img" :alt="icons.close.name" />
       <svg
         :style="{fill: colors.header.text}"
         xmlns="http://www.w3.org/2000/svg"

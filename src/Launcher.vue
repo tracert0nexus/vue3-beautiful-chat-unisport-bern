@@ -10,8 +10,8 @@
       <div v-if="newMessagesCount > 0 && !isOpen" class="sc-new-messsages-count">
         {{ newMessagesCount }}
       </div> <!-- TODO: Checkup before GoLive / PROD -->
-      <img v-if="isOpen" class="sc-closed-icon" :src="icons.close.img" :alt="icons.close.name" />
-      <img v-else class="sc-open-icon" :src="icons.open.img" :alt="icons.open.name" />
+      <IconClose v-if="isOpen" class="sc-open-icon" />
+      <IconChat v-else class="sc-open-icon" />
     </div>
     <ChatWindow
       :message-list="messageList"
@@ -80,36 +80,17 @@
 </template>
 
 <script>
-import store from './store/'
 import ChatWindow from './ChatWindow.vue'
-
-import CloseIcon from './assets/close.svg'
-import OpenIcon from './assets/logo-no-bg.svg'
+import IconClose from './components/icons/IconClose.vue'
+import IconChat from './components/icons/IconChat.vue'
 
 export default {
   components: {
-    ChatWindow
+    ChatWindow,
+    IconClose,
+    IconChat
   },
   props: {
-    icons: {
-      type: Object,
-      default: function () {
-        return {
-          open: {
-            img: null,
-            name: ''
-          },
-          close: {
-            img: null,
-            name: ''
-          },
-          minimize: {
-            img: null,
-            name: 'default'
-          }
-        }
-      }
-    },
     showEmoji: {
       type: Boolean,
       default: false
@@ -286,17 +267,6 @@ export default {
       if (this.participants.length > 1) return 'You, ' + this.participants[0].name + ' & others'
 
       return 'You & ' + this.participants[0].name
-    }
-  },
-  watch: {
-    $props: {
-      deep: true,
-      immediate: true,
-      handler(props) {
-        for (const prop in props) {
-          store.setState(prop, props[prop])
-        }
-      }
     }
   },
   methods: {
