@@ -1,12 +1,7 @@
 <template>
   <div class="sc-header" :style="{background: colors.header.bg, color: colors.header.text, zIndex: 1}">
     <img v-if="titleImageUrl" class="sc-header--img" :src="titleImageUrl" alt="" />
-    <div v-if="!disableUserListToggle" class="sc-header--title enabled" @click="toggleUserList">
-      <slot>
-        {{ title }}
-      </slot>
-    </div>
-    <div v-else class="sc-header--title">
+    <div class="sc-header--title">
       <slot>
         {{ title }}
       </slot>
@@ -111,12 +106,6 @@ export default {
   computed: {
     ...mapState(['disableUserListToggle', 'titleImageUrl', 'showCloseButton', 'showMinimizeButton'])
   },
-  methods: {
-    toggleUserList() {
-      this.inUserList = !this.inUserList
-      this.$emit('userList', this.inUserList)
-    }
-  }
 }
 </script>
 

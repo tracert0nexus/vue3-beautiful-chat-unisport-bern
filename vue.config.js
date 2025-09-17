@@ -27,7 +27,7 @@ module.exports = {
   pages: {
     demo: {
       entry: 'demo/src/main.js',
-      template: 'demo/public/mockup.html',
+      template: 'demo/public/index.html',
       filename: 'index.html'
     }
   }

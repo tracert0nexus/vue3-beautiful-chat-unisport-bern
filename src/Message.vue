@@ -50,25 +50,6 @@
           </slot>
         </template>
       </TextMessage>
-      <EmojiMessage v-else-if="message.type === 'emoji'" :message="message">
-        <template #default="scopedProps">
-          <slot name="emoji-message-body" :message="scopedProps.message"></slot>
-        </template>
-      </EmojiMessage>
-      <FileMessage
-        v-else-if="message.type === 'file'"
-        :message="message"
-        :message-colors="messageColors"
-      >
-        <template #default="scopedProps">
-          <slot
-            name="file-message-body"
-            :message="scopedProps.message"
-            :message-colors="scopedProps.messageColors"
-          >
-          </slot>
-        </template>
-      </FileMessage>
       <TypingMessage v-else-if="message.type === 'typing'" :message-colors="messageColors" />
       <SystemMessage
         v-else-if="message.type === 'system'"

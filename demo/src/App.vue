@@ -7,17 +7,10 @@
       :is-open="isChatOpen"
       :message-list="messageList"
       :message-styling="messageStyling"
-      :new-messages-count="newMessagesCount"
       :on-message-was-sent="onMessageWasSent"
       :open="openChat"
       :participants="participants"
-      :show-close-button="true"
       :show-text-input="showTextInput"
-      :show-typing-indicator="showTypingIndicator"
-      :disable-user-list-toggle="false"
-      @onType="handleOnType"
-      @edit="editMessage"
-      @remove="removeMessage"
     >
       <template v-slot:header>
         Unisport Sekretariat
@@ -38,7 +31,6 @@
 </template>
 
 <script>
-import messageHistory from './messageHistory'
 import chatParticipants from './chatProfiles'
 import availableColors from './colors'
 import axios from 'axios'
@@ -48,8 +40,7 @@ export default {
   data() {
     return {
       participants: chatParticipants,
-      messageList: messageHistory,
-      newMessagesCount: 0,
+      messageList: [],
       isChatOpen: false,
       showTypingIndicator: '',
       colors: null,
@@ -61,14 +52,6 @@ export default {
       showTextInput: false
     }
   },
-  computed: {
-    linkColor() {
-      return this.chosenColor === 'dark' ? this.colors.sentMessage.text : this.colors.launcher.bg
-    },
-    backgroundColor() {
-      return this.chosenColor === 'dark' ? this.colors.messageList.bg : '#fff'
-    }
-  },
   created() {
     this.setColor('red')
   },
@@ -76,6 +59,9 @@ export default {
     this.messageList.forEach((x) => (x.liked = false))
   },
   methods: {
+    makeId() {
+      return Math.floor(Math.random() * 1e9);
+    },
     sendMessage(text) {
       if (text.length > 0) {
         this.newMessagesCount = this.isChatOpen ? this.newMessagesCount : this.newMessagesCount + 1
@@ -87,14 +73,10 @@ export default {
         })
       }
     },
-    handleTyping(text) {
-      this.showTypingIndicator =
-        text.length > 0 ? this.participants[this.participants.length - 1].id : ''
-    },
     async onMessageWasSent(message) {
       // 1) User-Nachricht anhängen
-      const makeId = () => Math.floor(Math.random() * 1e9);
-      const userMsg = { ...message, id: message.id ?? makeId() };
+
+      const userMsg = { ...message, id: message.id ?? this.makeId() };
       this.messageList = [...this.messageList, userMsg];
 
       console.log("Selected Option-ID:", message.suggestionId);
@@ -103,14 +85,14 @@ export default {
       if (message.suggestionId) {
         try {
           const { data } = await axios.post(
-              'http://130.92.87.146:82/index.php/api/ask',
+              'http://localhost:82/index.php/api/ask',
               { id: message.suggestionId }
           );
 
           // API liefert ein Array von Messages -> direkt anhängen
           const botMessages = (Array.isArray(data) ? data : [data]).map(m => ({
             ...m,
-            id: m.id ?? makeId() // falls Backend keine id setzt
+            id: m.id ?? this.makeId() // falls Backend keine id setzt
           }));
 
           this.messageList = [...this.messageList, ...botMessages];
@@ -126,21 +108,52 @@ export default {
             {
               type: 'text',
               author: 'system',
-              id: makeId(),
+              id: this.makeId(),
               data: { text: 'Konnte die Antwort nicht laden. Bitte wende dich an it.sport@unibe.ch' },
               suggestions: []
             }
           ];
-          this.showTextInput = true;
+          //this.showTextInput = true;
         }
       } else {
         // Freitextfall
-        this.showTextInput = true;
+        //this.showTextInput = true;
       }
     },
-    openChat() {
+    async openChat() {
       this.isChatOpen = true
-      this.newMessagesCount = 0
+      if(this.messageList.length === 0) {
+        try {
+          const { data } = await axios.post(
+              'http://localhost:82/index.php/api/ask',
+              { id: -1 } // Initiale Anfrage
+          );
+
+          console.log(data)
+          // API liefert ein Array von Messages -> direkt anhängen
+          const botMessages = (Array.isArray(data) ? data : [data]).map(m => ({
+            ...m,
+            id: m.id ?? this.makeId() // falls Backend keine id setzt
+          }));
+
+          this.messageList = [...this.messageList, ...botMessages];
+
+          // 3) Texteingabe nur anzeigen, wenn keine Suggestions mehr vorliegen
+          const last = botMessages[botMessages.length - 1] || {};
+          this.showTextInput = !(Array.isArray(last.suggestions) && last.suggestions.length > 0);
+        } catch(err) {
+          console.error(err);
+          this.messageList = [
+            ...this.messageList,
+            {
+              type: 'text',
+              author: 'system',
+              id: this.makeId(),
+              data: { text: 'Keinen guten Draht zur Cloud... Bitte wende dich an it.sport@unibe.ch' },
+            }
+          ];
+        }
+      }
     },
     closeChat() {
       this.isChatOpen = false
@@ -149,38 +162,9 @@ export default {
       this.colors = this.availableColors[color]
       this.chosenColor = color
     },
-    showStylingInfo() {
-      alert(
-        'You can use *word* to <strong>boldify</strong>, /word/ to <em>emphasize</em>, _word_ to <u>underline</u>, `code` to <code>write = code;</code>, ~this~ to <del>delete</del> and ^sup^ or ¡sub¡ to write <sup>sup</sup> and <sub>sub</sub>'
-      )
-      // this.$modal.show('dialog', {
-      //   title: 'Info',
-      //   text:
-      //     'You can use *word* to <strong>boldify</strong>, /word/ to <em>emphasize</em>, _word_ to <u>underline</u>, `code` to <code>write = code;</code>, ~this~ to <del>delete</del> and ^sup^ or ¡sub¡ to write <sup>sup</sup> and <sub>sub</sub>'
-      // })
-    },
-    messageStylingToggled(e) {
-      this.messageStyling = e.target.checked
-    },
     handleOnType(e) {
       this.$event.$emit('onType', e)
       this.userIsTyping = true
-    },
-    editMessage(message) {
-      const m = this.messageList.find((m) => m.id === message.id)
-      m.isEdited = true
-      m.data.text = message.data.text
-    },
-    removeMessage(message) {
-      const m = this.messageList.find((m) => m.id === message.id)
-      m.type = 'system'
-      m.data.text = 'This message has been removed'
-    },
-    like(id) {
-      const m = this.messageList.findIndex((m) => m.id === id)
-      var msg = this.messageList[m]
-      msg.liked = !msg.liked
-      this.messageList[m] = msg
     }
   }
 }
