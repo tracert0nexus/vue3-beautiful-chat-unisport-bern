@@ -2,35 +2,10 @@
   <div>
     <Suggestions :suggestions="suggestions" :colors="colors" @sendSuggestion="_submitSuggestion" />
     <div
-      v-if="file && showTextInput"
-      class="file-container"
-      :style="{
-        backgroundColor: colors.userInput.bg,
-        color: colors.userInput.text
-      }"
+      v-if="showTextInput"
     >
       <div class="flex flex-row items-center gap-3">
-        <span class="icon-file-message">
-          <img
-            v-if="!imageData"
-            :src="icons.file.img"
-            :alt="icons.file.name"
-            style="height: 65px"
-          />
-          <img
-            v-else
-            :src="imageData"
-            alt="Uploaded Image"
-            style="height: 65px; object-fit: cover"
-          />
-        </span>
-        <span>
-          {{
-            // @ts-ignore
-            file.name
-          }}
-        </span>
-        <span class="delete-file-message" @click="cancelFile()">
+
         <svg
             viewBox="0 0 47.971 47.971"
             xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +15,7 @@
               d="M28.228,23.986L47.092,5.122c1.172-1.171,1.172-3.071,0-4.242c-1.172-1.172-3.07-1.172-4.242,0L23.986,19.744L5.121,0.88   c-1.172-1.172-3.07-1.172-4.242,0c-1.172,1.171-1.172,3.071,0,4.242l18.865,18.864L0.879,42.85c-1.172,1.171-1.172,3.071,0,4.242   C1.465,47.677,2.233,47.97,3,47.97s1.535-0.293,2.121-0.879l18.865-18.864L42.85,47.091c0.586,0.586,1.354,0.879,2.121,0.879   s1.535-0.293,2.121-0.879c1.172-1.171,1.172-3.071,0-4.242L28.228,23.986z"
           />
         </svg>
-      </span>
+
       </div>
     </div>
     <form
@@ -65,20 +40,8 @@
       ></div>
       <div class="sc-user-input--buttons">
         <div class="sc-user-input--button"></div>
-        <div v-if="showEmoji && !isEditing" class="sc-user-input--button">
-          <EmojiIcon
-            :on-emoji-picked="_handleEmojiPicked"
-            :color="colors.userInput.text"
-            :colors="colors"
-          />
-        </div>
-        <div v-if="showFile && !isEditing" class="sc-user-input--button">
-          <FileIcons
-            :on-change="_handleFileSubmit"
-            :color="colors.userInput.text"
-            :accepted-file-types="acceptedFileTypes"
-          />
-        </div>
+
+
         <div v-if="isEditing" class="sc-user-input--button">
           <UserInputButton
             :color="colors.userInput.text"
@@ -112,11 +75,8 @@
 </template>
 
 <script>
-import EmojiIcon from './icons/EmojiIcon.vue'
-import FileIcons from './icons/FileIcons.vue'
 import UserInputButton from './UserInputButton.vue'
 import Suggestions from './Suggestions.vue'
-import FileIcon from './assets/file.svg'
 import CloseIconSvg from './assets/close.svg'
 import store from './store/'
 import IconCross from './components/icons/IconCross.vue'
@@ -125,8 +85,6 @@ import IconSend from './components/icons/IconSend.vue'
 
 export default {
   components: {
-    EmojiIcon,
-    FileIcons,
     UserInputButton,
     Suggestions,
     IconCross,
@@ -138,10 +96,6 @@ export default {
       type: Object,
       default: function () {
         return {
-          file: {
-            img: FileIcon,
-            name: 'default'
-          },
           closeSvg: {
             img: CloseIconSvg,
             name: 'default'
@@ -149,21 +103,9 @@ export default {
         }
       }
     },
-    showEmoji: {
-      type: Boolean,
-      default: () => false
-    },
-    showEmojiInText: {
-      type: Boolean,
-      default: () => false
-    },
     suggestions: {
       type: Array,
       default: () => []
-    },
-    showFile: {
-      type: Boolean,
-      default: () => false
     },
     showTextInput: {
       type: Boolean,
@@ -181,15 +123,9 @@ export default {
       type: Object,
       required: true
     },
-    acceptedFileTypes: {
-      type: Array,
-      required: false,
-      default: () => ['*/*']
-    }
   },
   data() {
     return {
-      file: null,
       inputActive: false,
       prevSelectionRange: null,
       imageData: null
@@ -337,55 +273,6 @@ export default {
         })
         this._editFinish()
       }
-    },
-    _handleEmojiPicked(emoji) {
-      if (this.showEmojiInText) {
-        this._addToTextEmoji(emoji)
-      } else {
-        this._submitEmoji(emoji)
-      }
-    },
-    _submitEmoji(emoji) {
-      this._checkSubmitSuccess(
-        this.onSubmit({
-          author: 'me',
-          type: 'emoji',
-          data: {emoji}
-        })
-      )
-    },
-    _addToTextEmoji(emoji) {
-      let range = this.prevSelectionRange
-      if (!range) {
-        if (!this.$refs.userInput.firstChild) {
-          this.$refs.userInput.append(document.createTextNode(''))
-        }
-
-        range = document.createRange()
-        range.setStart(this.$refs.userInput.firstChild, this.$refs.userInput.textContent.length)
-        range.collapse(true)
-      }
-      let selection = window.getSelection()
-      selection.removeAllRanges()
-      selection.addRange(range)
-
-      let textNode = document.createTextNode(emoji)
-      range.deleteContents()
-      range.insertNode(textNode)
-      range.collapse(false)
-      this.$refs.userInput.focus()
-    },
-    _handleFileSubmit(file) {
-      this.file = file
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-          // @ts-ignore
-          this.imageData = e.target?.result
-        }
-        reader.readAsDataURL(file)
-      }
-      file.value = file
     },
     _editFinish() {
       store.setState('editMessage', null)

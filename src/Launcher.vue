@@ -9,7 +9,7 @@
     >
       <div v-if="newMessagesCount > 0 && !isOpen" class="sc-new-messsages-count">
         {{ newMessagesCount }}
-      </div> <!-- TODO: Checkup before GoLive / PROD -->
+      </div>
       <IconClose v-if="isOpen" class="sc-open-icon" />
       <IconChat v-else class="sc-open-icon" />
     </div>

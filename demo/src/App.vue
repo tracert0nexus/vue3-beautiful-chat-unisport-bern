@@ -34,28 +34,17 @@
       </template>
       <template v-slot:system-message-body="{message}"> [System]: {{ message.text }} </template>
     </beautiful-chat>
-    <TestArea
-      :chosen-color="chosenColor"
-      :colors="colors"
-      :message-styling="messageStyling"
-      :on-message="sendMessage"
-      :on-typing="handleTyping"
-    />
   </div>
 </template>
 
 <script>
 import messageHistory from './messageHistory'
 import chatParticipants from './chatProfiles'
-import TestArea from './TestArea.vue'
 import availableColors from './colors'
 import axios from 'axios'
 
 export default {
   name: 'App',
-  components: {
-    TestArea
-  },
   data() {
     return {
       participants: chatParticipants,
