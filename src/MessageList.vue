@@ -37,17 +37,6 @@
         <slot name="text-message-toolbox" :message="scopedProps.message" :me="scopedProps.me">
         </slot>
       </template>
-      <template #file-message-body="scopedProps">
-        <slot
-          name="file-message-body"
-          :message="scopedProps.message"
-          :message-colors="scopedProps.messageColors"
-        >
-        </slot>
-      </template>
-      <template #emoji-message-body="scopedProps">
-        <slot name="emoji-message-body" :message="scopedProps.message"> </slot>
-      </template>
     </Message>
     <Message
       v-show="showTypingIndicator !== ''"

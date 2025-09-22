@@ -18,8 +18,6 @@
       :show-typing-indicator="showTypingIndicator"
       :colors="colors"
       :always-scroll-to-bottom="alwaysScrollToBottom"
-      :show-confirmation-deletion="showConfirmationDeletion"
-      :confirmation-deletion-message="confirmationDeletionMessage"
       :message-styling="messageStyling"
       :message-margin="messageMargin"
       @scrollToTop="$emit('scrollToTop')"
@@ -62,11 +60,9 @@
       :show-emoji-in-text="showEmojiInText"
       :on-submit="onUserInputSubmit"
       :suggestions="getSuggestions()"
-      :show-file="showFile"
       :show-text-input="showTextInput"
       :placeholder="placeholder"
       :colors="colors"
-      :accepted-file-types="acceptedFileTypes"
       @onType="$emit('onType', $event)"
       @edit="$emit('edit', $event)"
     />
@@ -88,18 +84,6 @@ export default {
     UserList
   },
   props: {
-    showEmoji: {
-      type: Boolean,
-      default: false
-    },
-    showEmojiInText: {
-      type: Boolean,
-      default: false
-    },
-    showFile: {
-      type: Boolean,
-      default: false
-    },
     showTextInput: {
       type: Boolean,
       default: false
@@ -148,13 +132,9 @@ export default {
       type: Boolean,
       required: true
     },
-    showConfirmationDeletion: {
-      type: Boolean,
-      required: true
-    },
-    confirmationDeletionMessage: {
-      type: String,
-      required: true
+    showCloseButton: {
+      type: Object,
+      required: false
     },
     messageMargin: {
       type: Object,
