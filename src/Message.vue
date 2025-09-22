@@ -31,9 +31,6 @@
         :message="message"
         :message-colors="messageColors"
         :message-styling="messageStyling"
-        :show-confirmation-deletion="showConfirmationDeletion"
-        :confirmation-deletion-message="confirmationDeletionMessage"
-        @remove="$emit('remove')"
       >
         <template #default="scopedProps">
           <slot
@@ -50,9 +47,10 @@
           </slot>
         </template>
       </TextMessage>
-      <TypingMessage v-else-if="message.type === 'typing'" :message-colors="messageColors" />
+
+      <!-- Not needed... yet <TypingMessage v-else-if="message.type === 'typing'" :message-colors="messageColors" /> -->
       <SystemMessage
-        v-else-if="message.type === 'system'"
+        v-if="message.type === 'system'"
         :data="message.data"
         :message-colors="messageColors"
       >
@@ -66,7 +64,6 @@
 import TextMessage from './messages/TextMessage.vue'
 import TypingMessage from './messages/TypingMessage.vue'
 import SystemMessage from './messages/SystemMessage.vue'
-import chatIcon from './assets/chat-icon.svg'
 
 export default {
   components: {
@@ -89,14 +86,6 @@ export default {
     },
     user: {
       type: Object,
-      required: true
-    },
-    showConfirmationDeletion: {
-      type: Boolean,
-      required: true
-    },
-    confirmationDeletionMessage: {
-      type: String,
       required: true
     },
     messageMargin: {

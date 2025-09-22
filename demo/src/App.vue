@@ -89,6 +89,7 @@ export default {
               { id: message.suggestionId }
           );
 
+
           // API liefert ein Array von Messages -> direkt anhängen
           const botMessages = (Array.isArray(data) ? data : [data]).map(m => ({
             ...m,
